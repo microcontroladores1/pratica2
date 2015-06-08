@@ -1,0 +1,204 @@
+
+ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 1
+
+
+
+
+
+       MCS-51 Family Macro Assembler   A S E M - 5 1   V 1.3
+       =====================================================
+
+
+
+	Source File:	pratica2.asm
+	Object File:	pratica2.hex
+	List File:	pratica2.lst
+
+
+
+ Line  I  Addr  Code            Source
+
+    1:				; Controle de Temperatura
+    2:				; Programador: Fco Edno
+    3:				;
+    4:				; Com um ADC de 8 bits na porta P2 e verificado o valor de temperatura
+    5:				; de um LM35. Se o valor do adc for maior que 23 (25 C), eh acionado
+    6:				; um cooler para resfriamento. A faixa de medicao esta entre [2C,150C].
+    7:				; Cada grau a mais representa uma unidade binaria, isto eh, 2C = 0 e 3C = 1.
+    8:
+    9:				;**************************************************************
+   10:				; Equates
+						  *
+   11:				;**************************************************************
+   12:		D      00A0	ADC		equ		p2
+   13:		B      0080	FAN		equ		p0.0
+   14:		N      00E8	K		equ		232 						; Constante para ver
+				ificar nivel maximo
+   15:
+   16:
+   17:				;**************************************************************
+   18:				; Main
+						  *
+   19:				;**************************************************************
+   20:	  0000			Main:
+   21:	  0000	A8 A0				mov		r0, ADC						; Joga o valor do AD
+				C no r0
+   22:	  0002	E8				mov		a, r0						; Adiciona K ao acum
+				ulador, se a carry
+   23:	  0003	24 E8				add		a, #K						; for setada, o valo
+				r maximo foi alcancado
+   24:
+   25:	  0005	40 05				jc		Liga
+   26:	  0007	D2 80		Desl:	setb	FAN
+   27:	  0009	02 00 0E			jmp		Exit
+   28:	  000C	C2 80		Liga:	clr		FAN
+   29:
+   30:	  000E			Exit:
+   31:	  000E	11 12				acall DcdADC
+   32:	  0010	11 13				acall Disp
+   33:
+   34:
+   35:
+   36:				;**************************************************************
+   37:				; Sub Rotinas
+
+ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 2
+
+
+
+ Line  I  Addr  Code            Source
+
+   38:				;**************************************************************
+   39:
+   40:				; -------------------------------------------------------------
+   41:				; DcdADC
+   42:				; -------------------------------------------------------------
+   43:				; Decodifica o ADC e armazena na memoriam RAM para imprimir
+   44:				; Futuramente num display de 7 segmentos
+   45:				; -------------------------------------------------------------
+   46:	  0012			DcdADC:
+   47:	  0012	22				ret
+   48:
+   49:				; -------------------------------------------------------------
+   50:				; Disp
+   51:				; -------------------------------------------------------------
+   52:				; Faz a leitura do valor decimal do ADC e imprime no Display
+   53:				; de 7 segmentos
+   54:				; -------------------------------------------------------------
+   55:
+   56:	  0013			Disp:
+   57:	  0013	22				ret
+						   ^
+			  @@@@@ no END statement found @@@@@
+
+
+
+
+
+
+                     register banks used:  ---
+
+                     1 error detected
+
+
+
+
+ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 3
+
+
+
+
+
+	       L I S T   O F   S Y M B O L S
+	       =============================
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+??ASEM_51			  NUMBER    8051
+??VERSION			  NUMBER    0130
+AC				  BIT	      D6
+ACC				  DATA	      E0
+ADC				  NUMBER    00A0	  12
+B				  DATA	      F0
+CY				  BIT	      D7
+DCDADC				  CODE	    0012	  46
+DESL				  CODE	    0007	  26
+DISP				  CODE	    0013	  56
+DPH				  DATA	      83
+DPL				  DATA	      82
+EA				  BIT	      AF
+ES				  BIT	      AC
+ET0				  BIT	      A9
+ET1				  BIT	      AB
+EX0				  BIT	      A8
+EX1				  BIT	      AA
+EXIT				  CODE	    000E	  30
+EXTI0				  CODE	    0003
+EXTI1				  CODE	    0013
+F0				  BIT	      D5
+FAN				  NUMBER    0080	  13
+IE				  DATA	      A8
+IE0				  BIT	      89
+IE1				  BIT	      8B
+INT0				  BIT	      B2
+INT1				  BIT	      B3
+IP				  DATA	      B8
+IT0				  BIT	      88
+IT1				  BIT	      8A
+K				  NUMBER    00E8	  14
+LIGA				  CODE	    000C	  28
+MAIN				  CODE	    0000	  20
+OV				  BIT	      D2
+P				  BIT	      D0
+P0				  DATA	      80
+P1				  DATA	      90
+P2				  DATA	      A0
+P3				  DATA	      B0
+PCON				  DATA	      87
+PS				  BIT	      BC
+PSW				  DATA	      D0
+PT0				  BIT	      B9
+PT1				  BIT	      BB
+PX0				  BIT	      B8
+PX1				  BIT	      BA
+RB8				  BIT	      9A
+RD				  BIT	      B7
+REN				  BIT	      9C
+
+ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 4
+
+
+
+SYMBOL				  TYPE     VALUE	LINE
+------------------------------------------------------------
+RESET				  CODE	    0000
+RI				  BIT	      98
+RS0				  BIT	      D3
+RS1				  BIT	      D4
+RXD				  BIT	      B0
+SBUF				  DATA	      99
+SCON				  DATA	      98
+SINT				  CODE	    0023
+SM0				  BIT	      9F
+SM1				  BIT	      9E
+SM2				  BIT	      9D
+SP				  DATA	      81
+T0				  BIT	      B4
+T1				  BIT	      B5
+TB8				  BIT	      9B
+TCON				  DATA	      88
+TF0				  BIT	      8D
+TF1				  BIT	      8F
+TH0				  DATA	      8C
+TH1				  DATA	      8D
+TI				  BIT	      99
+TIMER0				  CODE	    000B
+TIMER1				  CODE	    001B
+TL0				  DATA	      8A
+TL1				  DATA	      8B
+TMOD				  DATA	      89
+TR0				  BIT	      8C
+TR1				  BIT	      8E
+TXD				  BIT	      B1
+WR				  BIT	      B6
