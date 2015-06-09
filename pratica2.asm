@@ -16,6 +16,9 @@
 ; R2: Primeiro digito BCD da temperatura
 ; R3: Segundo digito BCD da temperatura
 ; R4: Terceiro digito BCD da temperatura
+; R5: Rotina de Delay
+; R6: Rotina de Delay
+; R7: Contador na rotina de envio para o shift register
 ; -------------------------------------------------------------
 
 ;**************************************************************
@@ -29,6 +32,12 @@ DP2		equ		p1							; Display de 7 segmentos 2
 
 K		equ		232 						; Constante para verificar nivel maximo
 
+; -------------------------------------------------------------
+; Shift registers
+; -------------------------------------------------------------
+SHD		equ		p0.1
+SHCK	equ		p0.2
+SHLATCH	equ		p0.3
 
 ;**************************************************************
 ; Main														  *
@@ -87,8 +96,9 @@ DcdADC:
 ; -------------------------------------------------------------
 Disp:	
 		mov		a, r3
-		acall	LKDisp
-		mov		DP1, a
+		acall	LKDisp						; Bota no acumulador a decodificacao do BCD
+		acall	SHSend
+;		mov		DP1, a
 
 		mov		a, r4
 		acall	LKDisp
@@ -107,6 +117,44 @@ LKDisp: mov		dptr, #TABLE
 
 TABLE:	DB	81h, 0cfh, 92h, 86h, 0cch, 0a4h, 0a0h, 8fh, 80h, 8ch
 
+; -------------------------------------------------------------
+; SHSend
+; -------------------------------------------------------------
+; Envia para o display a codificacao pelo shiftregister
+; -------------------------------------------------------------
+SHSend:	
+		clr		SHLATCH
+		mov		r7, #8						; Contador
+
+Again:	mov		c, acc.7
+		mov		SHD, c
+		acall	CKPulse
+
+		rl		a
+		djnz	r7, Again
+		setb	SHLATCH
+
+		ret
+
+; -------------------------------------------------------------
+; CKPulse
+; -------------------------------------------------------------
+; Da um pulso de clock
+; -------------------------------------------------------------
+CKPulse:
+		setb	SHCK
+		acall	Delay
+		clr		SHCK
+
+		ret
+
+; -------------------------------------------------------------
+; Delay
+; -------------------------------------------------------------
+; Delay para o pulso de clock
+; -------------------------------------------------------------
+Delay:	mov		r5, #255
+		mov		r6, #255
 
 ;**************************************************************
 		end
