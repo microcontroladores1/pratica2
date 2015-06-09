@@ -1,0 +1,113 @@
+,,,; Controle de Temperatura
+,,,; Programador: Fco Edno
+,,,;
+,,,; Com um ADC de 8 bits na porta P2 e verificado o valor de temperatura
+,,,; de um LM35. Se o valor do adc for maior que 23 (25 C), eh acionado
+,,,; um cooler para resfriamento. A faixa de medicao esta entre [2C,150C].
+,,,; Cada grau a mais representa uma unidade binaria, isto eh, 2C = 0 e 3C = 1.
+,,,;
+,,,; ADC: P2, FAN: P0.0, Display: P3 e P1.
+,,,;
+,,,; -------------------------------------------------------------
+,,,; Mapa dos registradores:
+,,,; -------------------------------------------------------------
+,,,; R0: ADC Puro
+,,,; R1: Temperatura em Graus
+,,,; R2: Primeiro digito BCD da temperatura
+,,,; R3: Segundo digito BCD da temperatura
+,,,; R4: Terceiro digito BCD da temperatura
+,,,; -------------------------------------------------------------
+,,,
+,,,;**************************************************************
+,,,; Equates
+,,,;**************************************************************
+000D,,,ADC             equ             p2
+000B,,,FAN             equ             p0.0
+,,,
+000D,,,DP1             equ             p3                                                      ; Display de
+000D,,,DP2             equ             p1                                                      ; Display de
+,,,
+,,,K               equ             232                                             ; Constante para ver
+,,,
+,,,
+,,,;**************************************************************
+,,,; Main
+,,,;**************************************************************
+,,,
+0000,A8 A0,Main,Main:   mov             r0, ADC                                         ; Joga o valor do ADC no r0
+0002,E8,,                mov             a, r0                                           ; Adiciona K ao acum
+0003,24 E8,,                add             a, #K                                           ; for setada, o valo
+,,,
+0005,40 06,,                jc              Liga                                            ; Verifica o estado
+0007,C3,Desl,Desl:   clr             c                                                       ; liga o cooler, cas
+0008,D2 80,,                setb    FAN
+000A,02 00 10,,                jmp             Exit
+,,,
+000D,C3,Liga,Liga:   clr             c
+000E,C2 80,,                clr             FAN
+,,,
+0010,11 16,Exit,Exit:   acall   DcdADC
+0012,11 2A,,                acall   Disp
+,,,
+0014,01 00,,                ajmp    Main
+,,,
+,,,;**************************************************************
+,,,; Sub Rotinas
+,,,;**************************************************************
+,,,
+,,,; -------------------------------------------------------------
+,,,; DcdADC
+,,,; -------------------------------------------------------------
+,,,; Decodifica o ADC e armazena na memoria RAM para imprimir
+,,,; Futuramente num display de 7 segmentos
+,,,; -------------------------------------------------------------
+0016,,DcdADC,DcdADC:
+0016,E8,,                mov             a, r0                                           ; Para obter o decim
+0017,24 02,,                add             a, #2                                           ; Somo 2 ao valor ob
+0019,F9,,                mov             r1,a
+,,,
+001A,E9,,                mov             a, r1
+001B,75 F0 64,,                mov             b, #100
+001E,84,,                div             ab
+001F,FA,,                mov             r2,a
+,,,
+0020,E5 F0,,                mov             a, b
+0022,75 F0 0A,,                mov             b, #10
+0025,84,,                div             ab
+0026,FB,,                mov             r3,a
+0027,AC F0,,                mov             r4,b
+,,,
+0029,22,,                ret
+,,,
+,,,; -------------------------------------------------------------
+,,,; Disp
+,,,; -------------------------------------------------------------
+,,,; Faz a leitura do valor decimal do ADC e imprime no Display
+,,,; de 7 segmentos
+,,,; -------------------------------------------------------------
+002A,,Disp,Disp:
+002A,EB,,                mov             a, r3
+002B,11 35,,                acall   LKDisp
+002D,F5 B0,,                mov             DP1, a
+,,,
+002F,EC,,                mov             a, r4
+0030,11 35,,                acall   LKDisp
+0032,F5 90,,                mov             DP2, a
+,,,
+0034,22,,                ret
+,,,
+,,,; -------------------------------------------------------------
+,,,; LKDisp
+,,,; -------------------------------------------------------------
+,,,; Lookup-Table para decodificacao de displays de 7 segmentos
+,,,; -------------------------------------------------------------
+0035,90 00 3A,LKDisp,LKDisp: mov             dptr, #TABLE
+0038,93,,                movc    a, @a+dptr
+0039,22,,                ret
+,,,
+003A,81 CF 92 86,TABLE,TABLE:  DB      81h, 0cfh, 92h, 86h, 0cch, 0a4h, 0a0h, 8fh, 80h, 8ch
+,,,
+,,,
+,,,;**************************************************************
+000E,,,                end
+,,,;**************************************************************
