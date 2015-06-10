@@ -16,6 +16,9 @@
 ,,,; R2: Primeiro digito BCD da temperatura
 ,,,; R3: Segundo digito BCD da temperatura
 ,,,; R4: Terceiro digito BCD da temperatura
+,,,; R5: Rotina de Delay
+,,,; R6: Rotina de Delay
+,,,; R7: Contador na rotina de envio para o shift register
 ,,,; -------------------------------------------------------------
 ,,,
 ,,,;**************************************************************
@@ -34,7 +37,8 @@
 ,,,; -------------------------------------------------------------
 000B,,,SHD             equ             p0.1
 000B,,,SHCK    equ             p0.2
-000B,,,SHLATCH equ             p0.3
+000B,,,SHLTCH  equ             p0.3
+000B,,,SH2LTCH equ             p0.4
 ,,,
 ,,,;**************************************************************
 ,,,; Main
@@ -93,56 +97,73 @@
 ,,,; -------------------------------------------------------------
 002A,,Disp,Disp:
 002A,EB,,                mov             a, r3
-002B,11 35,,                acall   LKDisp                                          ; Bota no acumulador a decod
-002D,11 44,,                acall   SHSend
-,,,;               mov             DP1, a
+002B,11 3F,,                acall   LKDisp                                          ; Bota no acumulador a decod
+002D,F4,,                cpl             a
 ,,,
-002F,EC,,                mov             a, r4
-0030,11 35,,                acall   LKDisp
-0032,F5 90,,                mov             DP2, a
+002E,C2 83,,                clr             SHLTCH                                          ; Da pulso baixo par
+0030,11 4E,,                acall   SHSend
+0032,D2 83,,                setb    SHLTCH                                          ; Pulso alto para habilitar
 ,,,
-0034,22,,                ret
+0034,EC,,                mov             a, r4
+0035,11 3F,,                acall   LKDisp
+0037,F4,,                cpl             a
+,,,
+0038,C2 84,,                clr             SH2LTCH
+003A,11 4E,,                acall   SHSend
+003C,D2 84,,                setb    SH2LTCH
+,,,
+003E,22,,                ret
 ,,,
 ,,,; -------------------------------------------------------------
 ,,,; LKDisp
 ,,,; -------------------------------------------------------------
 ,,,; Lookup-Table para decodificacao de displays de 7 segmentos
 ,,,; -------------------------------------------------------------
-0035,90 00 3A,LKDisp,LKDisp: mov             dptr, #TABLE
-0038,93,,                movc    a, @a+dptr
-0039,22,,                ret
+003F,90 00 44,LKDisp,LKDisp: mov             dptr, #TABLE
+0042,93,,                movc    a, @a+dptr
+0043,22,,                ret
 ,,,
-003A,81 CF 92 86,TABLE,TABLE:  DB      81h, 0cfh, 92h, 86h, 0cch, 0a4h, 0a0h, 8fh, 80h, 8ch
+0044,81 CF 92 86,TABLE,TABLE:  DB      81h, 0cfh, 92h, 86h, 0cch, 0a4h, 0a0h, 8fh, 80h, 8ch
 ,,,
 ,,,; -------------------------------------------------------------
 ,,,; SHSend
 ,,,; -------------------------------------------------------------
 ,,,; Envia para o display a codificacao pelo shiftregister
 ,,,; -------------------------------------------------------------
-0044,,SHSend,SHSend:
-0044,C2 83,,                clr             SHLATCH
-0046,7F 08,,                mov             r7, #8                                          ; Contador
+004E,,SHSend,SHSend:
 ,,,
-0048,A2 E7,Again,Again:  mov             c, acc.7
-004A,92 81,,                mov             SHD, c
-004C,11 54,,                acall   CKPulse
+004E,7F 08,,                mov             r7, #8                                          ; Contador
 ,,,
-004E,23,,                rl              a
-004F,DF F7,,                djnz    r7, Again
-0051,D2 83,,                setb    SHLATCH
+0050,A2 E7,Again,Again:  mov             c, acc.7                                        ; Envia serialmente o MSB do
+0052,92 81,,                mov             SHD, c
+0054,11 5A,,                acall   CKPulse
 ,,,
-0053,22,,                ret
+0056,23,,                rl              a                                                       ; Rotaciona
+0057,DF F7,,                djnz    r7, Again
+,,,
+,,,
+0059,22,,                ret
 ,,,
 ,,,; -------------------------------------------------------------
 ,,,; CKPulse
 ,,,; -------------------------------------------------------------
-,,,; Da um pulso de clock
+,,,; Da um pulso de clock. Rotina utilizada no envio de dados
+,,,; Seriais para o registrador de deslocamento.
 ,,,; -------------------------------------------------------------
-0054,,CKPulse,CKPulse:
-0054,D2 82,,                setb    SHCK
-0056,C2 82,,                clr             SHCK
+005A,,CKPulse,CKPulse:
+005A,D2 82,,                setb    SHCK
+,,,                ;acall  Delay
+005C,C2 82,,                clr             SHCK
 ,,,
-0058,22,,                ret
+005E,22,,                ret
+,,,
+,,,; -------------------------------------------------------------
+,,,; Delay
+,,,; -------------------------------------------------------------
+,,,; Delay para o pulso de clock. Provavelmente desnecessario
+,,,; -------------------------------------------------------------
+005F,7D FF,Delay,Delay:  mov             r5, #255
+0061,7E FF,,                mov             r6, #255
 ,,,
 ,,,;**************************************************************
 000E,,,                end

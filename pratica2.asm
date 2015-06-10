@@ -37,7 +37,8 @@ K		equ		232 						; Constante para verificar nivel maximo
 ; -------------------------------------------------------------
 SHD		equ		p0.1
 SHCK	equ		p0.2
-SHLATCH	equ		p0.3
+SHLTCH	equ		p0.3
+SH2LTCH	equ		p0.4
 
 ;**************************************************************
 ; Main														  *
@@ -97,12 +98,19 @@ DcdADC:
 Disp:	
 		mov		a, r3
 		acall	LKDisp						; Bota no acumulador a decodificacao do BCD
+		cpl		a
+
+		clr		SHLTCH						; Da pulso baixo para desabilitar saida no SHIFT
 		acall	SHSend
-;		mov		DP1, a
+		setb	SHLTCH						; Pulso alto para habilitar a saida no SHIFT
 
 		mov		a, r4
 		acall	LKDisp
-		mov		DP2, a
+		cpl		a
+
+		clr		SH2LTCH
+		acall	SHSend
+		setb	SH2LTCH
 
 		ret
 
@@ -123,27 +131,28 @@ TABLE:	DB	81h, 0cfh, 92h, 86h, 0cch, 0a4h, 0a0h, 8fh, 80h, 8ch
 ; Envia para o display a codificacao pelo shiftregister
 ; -------------------------------------------------------------
 SHSend:	
-		clr		SHLATCH
+
 		mov		r7, #8						; Contador
 
-Again:	mov		c, acc.7
+Again:	mov		c, acc.7					; Envia serialmente o MSB do Acc
 		mov		SHD, c
 		acall	CKPulse
 
-		rl		a
+		rl		a							; Rotaciona o Acc para continuar o envio
 		djnz	r7, Again
-		setb	SHLATCH
+
 
 		ret
 
 ; -------------------------------------------------------------
 ; CKPulse
 ; -------------------------------------------------------------
-; Da um pulso de clock
+; Da um pulso de clock. Rotina utilizada no envio de dados
+; Seriais para o registrador de deslocamento.
 ; -------------------------------------------------------------
 CKPulse:
 		setb	SHCK
-		acall	Delay
+		;acall	Delay
 		clr		SHCK
 
 		ret
@@ -151,7 +160,7 @@ CKPulse:
 ; -------------------------------------------------------------
 ; Delay
 ; -------------------------------------------------------------
-; Delay para o pulso de clock
+; Delay para o pulso de clock. Provavelmente desnecessario
 ; -------------------------------------------------------------
 Delay:	mov		r5, #255
 		mov		r6, #255
