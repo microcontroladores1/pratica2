@@ -45,22 +45,22 @@ ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. 
    25:				; Equates
 						  *
    26:				;**************************************************************
-   27:		D      00A0	ADC		equ		p2
-   28:		B      0080	FAN		equ		p0.0
+   27:		D      0080	ADC		equ		p0
+   28:		B      00A0	FAN		equ		p2.0
    29:
-   30:		D      00B0	DP1		equ		p3							; Display de
-				 7 segmentos 1
-   31:		D      0090	DP2		equ		p1							; Display de
-				 7 segmentos 2
-   32:
-   33:		N      00E8	K		equ		232 						; Constante para ver
+   30:		N      00E8	K		equ		232 						; Constante para ver
 				ificar nivel maximo
-   34:
-   35:				; -------------------------------------------------------------
-   36:				; Shift registers
-   37:				; -------------------------------------------------------------
-   38:		B      0081	SHD		equ		p0.1
-   39:		B      0082	SHCK	equ		p0.2
+   31:
+   32:				; -------------------------------------------------------------
+   33:				; Shift registers
+   34:				; -------------------------------------------------------------
+   35:		B      00A1	SHD		equ		p2.1
+   36:		B      00A2	SHCK	equ		p2.2
+   37:		B      00A3	SHLTCH	equ		p2.3
+   38:		B      00A4	SH2LTCH	equ		p2.4
+   39:
+   40:				;**************************************************************
+   41:				; Main
 
 ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 2
 
@@ -68,62 +68,62 @@ ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. 
 
  Line  I  Addr  Code            Source
 
-   40:		B      0083	SHLTCH	equ		p0.3
-   41:		B      0084	SH2LTCH	equ		p0.4
-   42:
-   43:				;**************************************************************
-   44:				; Main
 						  *
-   45:				;**************************************************************
-   46:
-   47:	  0000	A8 A0		Main:	mov		r0, ADC						; Joga o valor do ADC no r0
-   48:	  0002	E8				mov		a, r0						; Adiciona K ao acum
+   42:				;**************************************************************
+   43:
+   44:	  0000	A8 80		Main:	mov		r0, ADC						; Joga o valor do ADC no r0
+   45:	  0002	E8				mov		a, r0						; Adiciona K ao acum
 				ulador, se a carry
-   49:	  0003	24 E8				add		a, #K						; for setada, o valo
+   46:	  0003	24 E8				add		a, #K						; for setada, o valo
 				r maximo foi alcancado
-   50:
-   51:	  0005	40 06				jc		Liga						; Verifica o estado
+   47:
+   48:	  0005	40 06				jc		Liga						; Verifica o estado
 				da Carry, se setada
-   52:	  0007	C3		Desl:	clr		c							; liga o cooler, cas
+   49:	  0007	C3		Desl:	clr		c							; liga o cooler, cas
 				o contrario desliga
-   53:	  0008	D2 80				setb	FAN
-   54:	  000A	02 00 10			jmp		Exit
+   50:	  0008	D2 A0				setb	FAN
+   51:	  000A	02 00 10			jmp		Exit
+   52:
+   53:	  000D	C3		Liga:	clr		c
+   54:	  000E	C2 A0				clr		FAN
    55:
-   56:	  000D	C3		Liga:	clr		c
-   57:	  000E	C2 80				clr		FAN
+   56:	  0010	11 16		Exit:	acall	DcdADC
+   57:	  0012	11 2A				acall	Disp
    58:
-   59:	  0010	11 16		Exit:	acall	DcdADC
-   60:	  0012	11 2A				acall	Disp
-   61:
-   62:	  0014	01 00				ajmp	Main
-   63:
-   64:				;**************************************************************
-   65:				; Sub Rotinas
+   59:	  0014	01 00				ajmp	Main
+   60:
+   61:				;**************************************************************
+   62:				; Sub Rotinas
 					  *
-   66:				;**************************************************************
-   67:
-   68:				; -------------------------------------------------------------
-   69:				; DcdADC
+   63:				;**************************************************************
+   64:
+   65:				; -------------------------------------------------------------
+   66:				; DcdADC
+   67:				; -------------------------------------------------------------
+   68:				; Decodifica o ADC e armazena na memoria RAM para imprimir
+   69:				; Futuramente num display de 7 segmentos
    70:				; -------------------------------------------------------------
-   71:				; Decodifica o ADC e armazena na memoria RAM para imprimir
-   72:				; Futuramente num display de 7 segmentos
-   73:				; -------------------------------------------------------------
-   74:	  0016			DcdADC:
-   75:	  0016	E8				mov		a, r0						; Para obter o decim
+   71:	  0016			DcdADC:
+   72:	  0016	E8				mov		a, r0						; Para obter o decim
 				al equivalente simplesmente
-   76:	  0017	24 02				add		a, #2						; Somo 2 ao valor ob
+   73:	  0017	24 02				add		a, #2						; Somo 2 ao valor ob
 				tido do ADC.
-   77:	  0019	F9				mov		r1,a
-   78:
-   79:	  001A	E9				mov		a, r1
-   80:	  001B	75 F0 64			mov		b, #100
-   81:	  001E	84				div		ab
-   82:	  001F	FA				mov		r2,a
-   83:
-   84:	  0020	E5 F0				mov		a, b
-   85:	  0022	75 F0 0A			mov		b, #10
-   86:	  0025	84				div		ab
-   87:	  0026	FB				mov		r3,a
+   74:	  0019	F9				mov		r1,a
+   75:
+   76:	  001A	E9				mov		a, r1
+   77:	  001B	75 F0 64			mov		b, #100
+   78:	  001E	84				div		ab
+   79:	  001F	FA				mov		r2,a
+   80:
+   81:	  0020	E5 F0				mov		a, b
+   82:	  0022	75 F0 0A			mov		b, #10
+   83:	  0025	84				div		ab
+   84:	  0026	FB				mov		r3,a
+   85:	  0027	AC F0				mov		r4,b
+   86:
+   87:	  0029	22				ret
+   88:
+   89:				; -------------------------------------------------------------
 
 ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 3
 
@@ -131,62 +131,62 @@ ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. 
 
  Line  I  Addr  Code            Source
 
-   88:	  0027	AC F0				mov		r4,b
-   89:
-   90:	  0029	22				ret
-   91:
-   92:				; -------------------------------------------------------------
-   93:				; Disp
+   90:				; Disp
+   91:				; -------------------------------------------------------------
+   92:				; Faz a leitura do valor decimal do ADC e imprime no Display
+   93:				; de 7 segmentos
    94:				; -------------------------------------------------------------
-   95:				; Faz a leitura do valor decimal do ADC e imprime no Display
-   96:				; de 7 segmentos
-   97:				; -------------------------------------------------------------
-   98:	  002A			Disp:
-   99:	  002A	EB				mov		a, r3
-  100:	  002B	11 3F				acall	LKDisp						; Bota no acumulador a decod
+   95:	  002A			Disp:
+   96:	  002A	EB				mov		a, r3
+   97:	  002B	11 3F				acall	LKDisp						; Bota no acumulador a decod
 				ificacao do BCD
-  101:	  002D	F4				cpl		a
-  102:
-  103:	  002E	C2 83				clr		SHLTCH						; Da pulso baixo par
+   98:	  002D	F4				cpl		a
+   99:
+  100:	  002E	C2 A3				clr		SHLTCH						; Da pulso baixo par
 				a desabilitar saida no SHIFT
-  104:	  0030	11 4E				acall	SHSend
-  105:	  0032	D2 83				setb	SHLTCH						; Pulso alto para habilitar
+  101:	  0030	11 4E				acall	SHSend
+  102:	  0032	D2 A3				setb	SHLTCH						; Pulso alto para habilitar
 				a saida no SHIFT
-  106:
-  107:	  0034	EC				mov		a, r4
-  108:	  0035	11 3F				acall	LKDisp
-  109:	  0037	F4				cpl		a
-  110:
-  111:	  0038	C2 84				clr		SH2LTCH
-  112:	  003A	11 4E				acall	SHSend
-  113:	  003C	D2 84				setb	SH2LTCH
-  114:
-  115:	  003E	22				ret
-  116:
-  117:				; -------------------------------------------------------------
-  118:				; LKDisp
-  119:				; -------------------------------------------------------------
-  120:				; Lookup-Table para decodificacao de displays de 7 segmentos
-  121:				; -------------------------------------------------------------
-  122:	  003F	90 00 44	LKDisp: mov		dptr, #TABLE
-  123:	  0042	93				movc	a, @a+dptr
-  124:	  0043	22				ret
-  125:
-  126:	  0044	81 CF 92 86	TABLE:	DB	81h, 0cfh, 92h, 86h, 0cch, 0a4h, 0a0h, 8fh, 80h, 8ch
+  103:
+  104:	  0034	EC				mov		a, r4
+  105:	  0035	11 3F				acall	LKDisp
+  106:	  0037	F4				cpl		a
+  107:
+  108:	  0038	C2 A4				clr		SH2LTCH
+  109:	  003A	11 4E				acall	SHSend
+  110:	  003C	D2 A4				setb	SH2LTCH
+  111:
+  112:	  003E	22				ret
+  113:
+  114:				; -------------------------------------------------------------
+  115:				; LKDisp
+  116:				; -------------------------------------------------------------
+  117:				; Lookup-Table para decodificacao de displays de 7 segmentos
+  118:				; -------------------------------------------------------------
+  119:	  003F	90 00 44	LKDisp: mov		dptr, #TABLE
+  120:	  0042	93				movc	a, @a+dptr
+  121:	  0043	22				ret
+  122:
+  123:	  0044	81 CF 92 86	TABLE:	DB	81h, 0cfh, 92h, 86h, 0cch, 0a4h, 0a0h, 8fh, 80h, 8ch
 	  0048	CC A4 A0 8F
 	  004C	80 8C
-  127:
-  128:				; -------------------------------------------------------------
-  129:				; SHSend
-  130:				; -------------------------------------------------------------
-  131:				; Envia para o display a codificacao pelo shiftregister
-  132:				; -------------------------------------------------------------
-  133:	  004E			SHSend:
-  134:
-  135:	  004E	7F 08				mov		r7, #8						; Contador
-  136:
-  137:	  0050	A2 E7		Again:	mov		c, acc.7					; Envia serialmente o MSB do
+  124:
+  125:				; -------------------------------------------------------------
+  126:				; SHSend
+  127:				; -------------------------------------------------------------
+  128:				; Envia para o display a codificacao pelo shiftregister
+  129:				; -------------------------------------------------------------
+  130:	  004E			SHSend:
+  131:
+  132:	  004E	7F 08				mov		r7, #8						; Contador
+  133:
+  134:	  0050	A2 E7		Again:	mov		c, acc.7					; Envia serialmente o MSB do
 				 Acc
+  135:	  0052	92 A1				mov		SHD, c
+  136:	  0054	11 5A				acall	CKPulse
+  137:
+  138:	  0056	23				rl		a							; Rotaciona
+				o Acc para continuar o envio
 
 ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 4
 
@@ -194,40 +194,35 @@ ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. 
 
  Line  I  Addr  Code            Source
 
-  138:	  0052	92 81				mov		SHD, c
-  139:	  0054	11 5A				acall	CKPulse
+  139:	  0057	DF F7				djnz	r7, Again
   140:
-  141:	  0056	23				rl		a							; Rotaciona
-				o Acc para continuar o envio
-  142:	  0057	DF F7				djnz	r7, Again
+  141:
+  142:	  0059	22				ret
   143:
-  144:
-  145:	  0059	22				ret
-  146:
-  147:				; -------------------------------------------------------------
-  148:				; CKPulse
+  144:				; -------------------------------------------------------------
+  145:				; CKPulse
+  146:				; -------------------------------------------------------------
+  147:				; Da um pulso de clock. Rotina utilizada no envio de dados
+  148:				; Seriais para o registrador de deslocamento.
   149:				; -------------------------------------------------------------
-  150:				; Da um pulso de clock. Rotina utilizada no envio de dados
-  151:				; Seriais para o registrador de deslocamento.
-  152:				; -------------------------------------------------------------
-  153:	  005A			CKPulse:
-  154:	  005A	D2 82				setb	SHCK
-  155:						;acall	Delay
-  156:	  005C	C2 82				clr		SHCK
-  157:
-  158:	  005E	22				ret
-  159:
-  160:				; -------------------------------------------------------------
-  161:				; Delay
-  162:				; -------------------------------------------------------------
-  163:				; Delay para o pulso de clock. Provavelmente desnecessario
-  164:				; -------------------------------------------------------------
-  165:	  005F	7D FF		Delay:	mov		r5, #255
-  166:	  0061	7E FF				mov		r6, #255
-  167:
-  168:				;**************************************************************
-  169:						end
-  170:				;**************************************************************
+  150:	  005A			CKPulse:
+  151:	  005A	D2 A2				setb	SHCK
+  152:						;acall	Delay
+  153:	  005C	C2 A2				clr		SHCK
+  154:
+  155:	  005E	22				ret
+  156:
+  157:				; -------------------------------------------------------------
+  158:				; Delay
+  159:				; -------------------------------------------------------------
+  160:				; Delay para o pulso de clock. Provavelmente desnecessario
+  161:				; -------------------------------------------------------------
+  162:	  005F	7D FF		Delay:	mov		r5, #255
+  163:	  0061	7E FF				mov		r6, #255
+  164:
+  165:				;**************************************************************
+  166:						end
+  167:				;**************************************************************
 
 
 
@@ -256,17 +251,15 @@ SYMBOL				  TYPE     VALUE	LINE
 ??VERSION			  NUMBER    0130
 AC				  BIT	      D6
 ACC				  DATA	      E0
-ADC				  NUMBER    00A0	  27
-AGAIN				  CODE	    0050	 137
+ADC				  NUMBER    0080	  27
+AGAIN				  CODE	    0050	 134
 B				  DATA	      F0
-CKPULSE				  CODE	    005A	 153
+CKPULSE				  CODE	    005A	 150
 CY				  BIT	      D7
-DCDADC				  CODE	    0016	  74
-DELAY				  CODE	    005F	 165
-DESL				  CODE	    0007	  52
-DISP				  CODE	    002A	  98
-DP1				  NUMBER    00B0	  30
-DP2				  NUMBER    0090	  31
+DCDADC				  CODE	    0016	  71
+DELAY				  CODE	    005F	 162
+DESL				  CODE	    0007	  49
+DISP				  CODE	    002A	  95
 DPH				  DATA	      83
 DPL				  DATA	      82
 EA				  BIT	      AF
@@ -275,11 +268,11 @@ ET0				  BIT	      A9
 ET1				  BIT	      AB
 EX0				  BIT	      A8
 EX1				  BIT	      AA
-EXIT				  CODE	    0010	  59
+EXIT				  CODE	    0010	  56
 EXTI0				  CODE	    0003
 EXTI1				  CODE	    0013
 F0				  BIT	      D5
-FAN				  NUMBER    0080	  28
+FAN				  NUMBER    00A0	  28
 IE				  DATA	      A8
 IE0				  BIT	      89
 IE1				  BIT	      8B
@@ -288,10 +281,10 @@ INT1				  BIT	      B3
 IP				  DATA	      B8
 IT0				  BIT	      88
 IT1				  BIT	      8A
-K				  NUMBER    00E8	  33
-LIGA				  CODE	    000D	  56
-LKDISP				  CODE	    003F	 122
-MAIN				  CODE	    0000	  47
+K				  NUMBER    00E8	  30
+LIGA				  CODE	    000D	  53
+LKDISP				  CODE	    003F	 119
+MAIN				  CODE	    0000	  44
 OV				  BIT	      D2
 P				  BIT	      D0
 P0				  DATA	      80
@@ -302,6 +295,8 @@ PCON				  DATA	      87
 PS				  BIT	      BC
 PSW				  DATA	      D0
 PT0				  BIT	      B9
+PT1				  BIT	      BB
+PX0				  BIT	      B8
 
 ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. Heinz                                         PAGE 6
 
@@ -309,8 +304,6 @@ ASEM-51 V1.3                                         Copyright (c) 2002 by W.W. 
 
 SYMBOL				  TYPE     VALUE	LINE
 ------------------------------------------------------------
-PT1				  BIT	      BB
-PX0				  BIT	      B8
 PX1				  BIT	      BA
 RB8				  BIT	      9A
 RD				  BIT	      B7
@@ -322,11 +315,11 @@ RS1				  BIT	      D4
 RXD				  BIT	      B0
 SBUF				  DATA	      99
 SCON				  DATA	      98
-SH2LTCH				  NUMBER    0084	  41
-SHCK				  NUMBER    0082	  39
-SHD				  NUMBER    0081	  38
-SHLTCH				  NUMBER    0083	  40
-SHSEND				  CODE	    004E	 133
+SH2LTCH				  NUMBER    00A4	  38
+SHCK				  NUMBER    00A2	  36
+SHD				  NUMBER    00A1	  35
+SHLTCH				  NUMBER    00A3	  37
+SHSEND				  CODE	    004E	 130
 SINT				  CODE	    0023
 SM0				  BIT	      9F
 SM1				  BIT	      9E
@@ -334,7 +327,7 @@ SM2				  BIT	      9D
 SP				  DATA	      81
 T0				  BIT	      B4
 T1				  BIT	      B5
-TABLE				  CODE	    0044	 126
+TABLE				  CODE	    0044	 123
 TB8				  BIT	      9B
 TCON				  DATA	      88
 TF0				  BIT	      8D

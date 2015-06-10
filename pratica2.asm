@@ -24,21 +24,18 @@
 ;**************************************************************
 ; Equates													  *
 ;**************************************************************
-ADC		equ		p2
-FAN		equ		p0.0
-
-DP1		equ		p3							; Display de 7 segmentos 1
-DP2		equ		p1							; Display de 7 segmentos 2
+ADC		equ		p0
+FAN		equ		p2.0
 
 K		equ		232 						; Constante para verificar nivel maximo
 
 ; -------------------------------------------------------------
 ; Shift registers
 ; -------------------------------------------------------------
-SHD		equ		p0.1
-SHCK	equ		p0.2
-SHLTCH	equ		p0.3
-SH2LTCH	equ		p0.4
+SHD		equ		p2.1
+SHCK	equ		p2.2
+SHLTCH	equ		p2.3
+SH2LTCH	equ		p2.4
 
 ;**************************************************************
 ; Main														  *

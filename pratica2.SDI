@@ -24,37 +24,34 @@
 ,,,;**************************************************************
 ,,,; Equates
 ,,,;**************************************************************
-000D,,,ADC             equ             p2
-000B,,,FAN             equ             p0.0
-,,,
-000D,,,DP1             equ             p3                                                      ; Display de
-000D,,,DP2             equ             p1                                                      ; Display de
+000D,,,ADC             equ             p0
+000B,,,FAN             equ             p2.0
 ,,,
 ,,,K               equ             232                                             ; Constante para ver
 ,,,
 ,,,; -------------------------------------------------------------
 ,,,; Shift registers
 ,,,; -------------------------------------------------------------
-000B,,,SHD             equ             p0.1
-000B,,,SHCK    equ             p0.2
-000B,,,SHLTCH  equ             p0.3
-000B,,,SH2LTCH equ             p0.4
+000B,,,SHD             equ             p2.1
+000B,,,SHCK    equ             p2.2
+000B,,,SHLTCH  equ             p2.3
+000B,,,SH2LTCH equ             p2.4
 ,,,
 ,,,;**************************************************************
 ,,,; Main
 ,,,;**************************************************************
 ,,,
-0000,A8 A0,Main,Main:   mov             r0, ADC                                         ; Joga o valor do ADC no r0
+0000,A8 80,Main,Main:   mov             r0, ADC                                         ; Joga o valor do ADC no r0
 0002,E8,,                mov             a, r0                                           ; Adiciona K ao acum
 0003,24 E8,,                add             a, #K                                           ; for setada, o valo
 ,,,
 0005,40 06,,                jc              Liga                                            ; Verifica o estado
 0007,C3,Desl,Desl:   clr             c                                                       ; liga o cooler, cas
-0008,D2 80,,                setb    FAN
+0008,D2 A0,,                setb    FAN
 000A,02 00 10,,                jmp             Exit
 ,,,
 000D,C3,Liga,Liga:   clr             c
-000E,C2 80,,                clr             FAN
+000E,C2 A0,,                clr             FAN
 ,,,
 0010,11 16,Exit,Exit:   acall   DcdADC
 0012,11 2A,,                acall   Disp
@@ -100,17 +97,17 @@
 002B,11 3F,,                acall   LKDisp                                          ; Bota no acumulador a decod
 002D,F4,,                cpl             a
 ,,,
-002E,C2 83,,                clr             SHLTCH                                          ; Da pulso baixo par
+002E,C2 A3,,                clr             SHLTCH                                          ; Da pulso baixo par
 0030,11 4E,,                acall   SHSend
-0032,D2 83,,                setb    SHLTCH                                          ; Pulso alto para habilitar
+0032,D2 A3,,                setb    SHLTCH                                          ; Pulso alto para habilitar
 ,,,
 0034,EC,,                mov             a, r4
 0035,11 3F,,                acall   LKDisp
 0037,F4,,                cpl             a
 ,,,
-0038,C2 84,,                clr             SH2LTCH
+0038,C2 A4,,                clr             SH2LTCH
 003A,11 4E,,                acall   SHSend
-003C,D2 84,,                setb    SH2LTCH
+003C,D2 A4,,                setb    SH2LTCH
 ,,,
 003E,22,,                ret
 ,,,
@@ -135,7 +132,7 @@
 004E,7F 08,,                mov             r7, #8                                          ; Contador
 ,,,
 0050,A2 E7,Again,Again:  mov             c, acc.7                                        ; Envia serialmente o MSB do
-0052,92 81,,                mov             SHD, c
+0052,92 A1,,                mov             SHD, c
 0054,11 5A,,                acall   CKPulse
 ,,,
 0056,23,,                rl              a                                                       ; Rotaciona
@@ -151,9 +148,9 @@
 ,,,; Seriais para o registrador de deslocamento.
 ,,,; -------------------------------------------------------------
 005A,,CKPulse,CKPulse:
-005A,D2 82,,                setb    SHCK
+005A,D2 A2,,                setb    SHCK
 ,,,                ;acall  Delay
-005C,C2 82,,                clr             SHCK
+005C,C2 A2,,                clr             SHCK
 ,,,
 005E,22,,                ret
 ,,,
