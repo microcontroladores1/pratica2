@@ -160,7 +160,12 @@ CKPulse:
 ; Delay para o pulso de clock. Provavelmente desnecessario
 ; -------------------------------------------------------------
 Delay:	mov		r5, #255
-		mov		r6, #255
+tt:		mov		r6, #255
+		
+		djnz	r6, $
+		djnz	r5, tt
+
+		ret
 
 ;**************************************************************
 		end

@@ -160,7 +160,12 @@
 ,,,; Delay para o pulso de clock. Provavelmente desnecessario
 ,,,; -------------------------------------------------------------
 005F,7D FF,Delay,Delay:  mov             r5, #255
-0061,7E FF,,                mov             r6, #255
+0061,7E FF,tt,tt:             mov             r6, #255
+,,,
+0063,DE FE,,                djnz    r6, $
+0065,DD FA,,                djnz    r5, tt
+,,,
+0067,22,,                ret
 ,,,
 ,,,;**************************************************************
 000E,,,                end
