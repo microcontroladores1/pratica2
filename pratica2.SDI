@@ -41,22 +41,24 @@
 ,,,; Main
 ,,,;**************************************************************
 ,,,
-0000,A8 80,Main,Main:   mov             r0, ADC                                         ; Joga o valor do ADC no r0
+0000,,Main,Main:
+0000,A8 80,,                mov             r0, ADC                                         ; Joga o valor do AD
 0002,E8,,                mov             a, r0                                           ; Adiciona K ao acum
-0003,24 E8,,                add             a, #K                                           ; for setada, o valo
+0003,94 15,,                subb    a, #21
+0005,24 E7,,                add             a, #(not 24)                            ; for setada, o valor maximo
 ,,,
-0005,40 06,,                jc              Liga                                            ; Verifica o estado
-0007,C3,Desl,Desl:   clr             c                                                       ; liga o cooler, cas
-0008,D2 A0,,                setb    FAN
-000A,02 00 10,,                jmp             Exit
+0007,40 06,,                jc              Liga                                            ; Verifica o estado
+0009,C3,Desl,Desl:   clr             c                                                       ; liga o cooler, cas
+000A,D2 A0,,                setb    FAN
+000C,02 00 12,,                jmp             Exit
 ,,,
-000D,C3,Liga,Liga:   clr             c
-000E,C2 A0,,                clr             FAN
+000F,C3,Liga,Liga:   clr             c
+0010,C2 A0,,                clr             FAN
 ,,,
-0010,11 16,Exit,Exit:   acall   DcdADC
-0012,11 2A,,                acall   Disp
+0012,11 18,Exit,Exit:   acall   DcdADC
+0014,11 2C,,                acall   Disp
 ,,,
-0014,01 00,,                ajmp    Main
+0016,01 00,,                ajmp    Main
 ,,,
 ,,,;**************************************************************
 ,,,; Sub Rotinas
@@ -68,23 +70,23 @@
 ,,,; Decodifica o ADC e armazena na memoria RAM para imprimir
 ,,,; Futuramente num display de 7 segmentos
 ,,,; -------------------------------------------------------------
-0016,,DcdADC,DcdADC:
-0016,E8,,                mov             a, r0                                           ; Para obter o decim
-0017,24 02,,                add             a, #2                                           ; Somo 2 ao valor ob
-0019,F9,,                mov             r1,a
+0018,,DcdADC,DcdADC:
+0018,E8,,                mov             a, r0                                           ; Para obter o decim
+0019,94 15,,                subb    a, #21                                          ; Somo 2 ao valor obtido do
+001B,F9,,                mov             r1,a
 ,,,
-001A,E9,,                mov             a, r1
-001B,75 F0 64,,                mov             b, #100
-001E,84,,                div             ab
-001F,FA,,                mov             r2,a
+001C,E9,,                mov             a, r1
+001D,75 F0 64,,                mov             b, #100
+0020,84,,                div             ab
+0021,FA,,                mov             r2,a
 ,,,
-0020,E5 F0,,                mov             a, b
-0022,75 F0 0A,,                mov             b, #10
-0025,84,,                div             ab
-0026,FB,,                mov             r3,a
-0027,AC F0,,                mov             r4,b
+0022,E5 F0,,                mov             a, b
+0024,75 F0 0A,,                mov             b, #10
+0027,84,,                div             ab
+0028,FB,,                mov             r3,a
+0029,AC F0,,                mov             r4,b
 ,,,
-0029,22,,                ret
+002B,22,,                ret
 ,,,
 ,,,; -------------------------------------------------------------
 ,,,; Disp
@@ -92,54 +94,54 @@
 ,,,; Faz a leitura do valor decimal do ADC e imprime no Display
 ,,,; de 7 segmentos
 ,,,; -------------------------------------------------------------
-002A,,Disp,Disp:
-002A,EB,,                mov             a, r3
-002B,11 3F,,                acall   LKDisp                                          ; Bota no acumulador a decod
-002D,F4,,                cpl             a
+002C,,Disp,Disp:
+002C,EB,,                mov             a, r3
+002D,11 41,,                acall   LKDisp                                          ; Bota no acumulador a decod
+002F,F4,,                cpl             a
 ,,,
-002E,C2 A3,,                clr             SHLTCH                                          ; Da pulso baixo par
-0030,11 4E,,                acall   SHSend
-0032,D2 A3,,                setb    SHLTCH                                          ; Pulso alto para habilitar
+0030,C2 A3,,                clr             SHLTCH                                          ; Da pulso baixo par
+0032,11 50,,                acall   SHSend
+0034,D2 A3,,                setb    SHLTCH                                          ; Pulso alto para habilitar
 ,,,
-0034,EC,,                mov             a, r4
-0035,11 3F,,                acall   LKDisp
-0037,F4,,                cpl             a
+0036,EC,,                mov             a, r4
+0037,11 41,,                acall   LKDisp
+0039,F4,,                cpl             a
 ,,,
-0038,C2 A4,,                clr             SH2LTCH
-003A,11 4E,,                acall   SHSend
-003C,D2 A4,,                setb    SH2LTCH
+003A,C2 A4,,                clr             SH2LTCH
+003C,11 50,,                acall   SHSend
+003E,D2 A4,,                setb    SH2LTCH
 ,,,
-003E,22,,                ret
+0040,22,,                ret
 ,,,
 ,,,; -------------------------------------------------------------
 ,,,; LKDisp
 ,,,; -------------------------------------------------------------
 ,,,; Lookup-Table para decodificacao de displays de 7 segmentos
 ,,,; -------------------------------------------------------------
-003F,90 00 44,LKDisp,LKDisp: mov             dptr, #TABLE
-0042,93,,                movc    a, @a+dptr
-0043,22,,                ret
+0041,90 00 46,LKDisp,LKDisp: mov             dptr, #TABLE
+0044,93,,                movc    a, @a+dptr
+0045,22,,                ret
 ,,,
-0044,81 CF 92 86,TABLE,TABLE:  DB      81h, 0cfh, 92h, 86h, 0cch, 0a4h, 0a0h, 8fh, 80h, 8ch
+0046,81 CF 92 86,TABLE,TABLE:  DB      81h, 0cfh, 92h, 86h, 0cch, 0a4h, 0a0h, 8fh, 80h, 8ch
 ,,,
 ,,,; -------------------------------------------------------------
 ,,,; SHSend
 ,,,; -------------------------------------------------------------
 ,,,; Envia para o display a codificacao pelo shiftregister
 ,,,; -------------------------------------------------------------
-004E,,SHSend,SHSend:
+0050,,SHSend,SHSend:
 ,,,
-004E,7F 08,,                mov             r7, #8                                          ; Contador
+0050,7F 08,,                mov             r7, #8                                          ; Contador
 ,,,
-0050,A2 E7,Again,Again:  mov             c, acc.7                                        ; Envia serialmente o MSB do
-0052,92 A1,,                mov             SHD, c
-0054,11 5A,,                acall   CKPulse
+0052,A2 E7,Again,Again:  mov             c, acc.7                                        ; Envia serialmente o MSB do
+0054,92 A1,,                mov             SHD, c
+0056,11 5C,,                acall   CKPulse
 ,,,
-0056,23,,                rl              a                                                       ; Rotaciona
-0057,DF F7,,                djnz    r7, Again
+0058,23,,                rl              a                                                       ; Rotaciona
+0059,DF F7,,                djnz    r7, Again
 ,,,
 ,,,
-0059,22,,                ret
+005B,22,,                ret
 ,,,
 ,,,; -------------------------------------------------------------
 ,,,; CKPulse
@@ -147,25 +149,25 @@
 ,,,; Da um pulso de clock. Rotina utilizada no envio de dados
 ,,,; Seriais para o registrador de deslocamento.
 ,,,; -------------------------------------------------------------
-005A,,CKPulse,CKPulse:
-005A,D2 A2,,                setb    SHCK
+005C,,CKPulse,CKPulse:
+005C,D2 A2,,                setb    SHCK
 ,,,                ;acall  Delay
-005C,C2 A2,,                clr             SHCK
+005E,C2 A2,,                clr             SHCK
 ,,,
-005E,22,,                ret
+0060,22,,                ret
 ,,,
 ,,,; -------------------------------------------------------------
 ,,,; Delay
 ,,,; -------------------------------------------------------------
 ,,,; Delay para o pulso de clock. Provavelmente desnecessario
 ,,,; -------------------------------------------------------------
-005F,7D FF,Delay,Delay:  mov             r5, #255
-0061,7E FF,tt,tt:             mov             r6, #255
+0061,7D FF,Delay,Delay:  mov             r5, #255
+0063,7E FF,tt,tt:             mov             r6, #255
 ,,,
-0063,DE FE,,                djnz    r6, $
-0065,DD FA,,                djnz    r5, tt
+0065,DE FE,,                djnz    r6, $
+0067,DD FA,,                djnz    r5, tt
 ,,,
-0067,22,,                ret
+0069,22,,                ret
 ,,,
 ,,,;**************************************************************
 000E,,,                end
