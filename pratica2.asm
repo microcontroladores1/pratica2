@@ -27,8 +27,6 @@
 ADC		equ		p0
 FAN		equ		p2.0
 
-K		equ		232 						; Constante para verificar nivel maximo
-
 ; -------------------------------------------------------------
 ; Shift registers
 ; -------------------------------------------------------------
@@ -41,9 +39,11 @@ SH2LTCH	equ		p2.4
 ; Main														  *
 ;**************************************************************
 
-Main:	mov		r0, ADC						; Joga o valor do ADC no r0 
+Main:	
+		mov		r0, ADC						; Joga o valor do ADC no r0 
 		mov		a, r0						; Adiciona K ao acumulador, se a carry 
-		add		a, #K						; for setada, o valor maximo foi alcancado
+		subb	a, #21
+		add		a, #(not 24)				; for setada, o valor maximo foi alcancado
 
 		jc		Liga						; Verifica o estado da Carry, se setada
 Desl:	clr		c							; liga o cooler, caso contrario desliga	
@@ -70,7 +70,7 @@ Exit:	acall	DcdADC
 ; -------------------------------------------------------------
 DcdADC:
 		mov		a, r0						; Para obter o decimal equivalente simplesmente
-		add		a, #2						; Somo 2 ao valor obtido do ADC.
+		subb	a, #21						; Somo 2 ao valor obtido do ADC.
 		mov		r1,a
 
 		mov		a, r1
